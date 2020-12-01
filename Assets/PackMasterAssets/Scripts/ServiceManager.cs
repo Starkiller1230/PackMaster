@@ -36,10 +36,10 @@ public class ServiceManager : MonoBehaviour
         Item[] _baggageItemsList = FillArrayWithRandomItems(_sizeArrayItems.width * _sizeArrayItems.height);
 
         SmoothItemsListOnPanels(_baggageItemsList);
-        Vector2 _rectSize = _leftSideBaggage.GetComponent<RectTransform>().rect.size;
+        Vector2 _rectSizeLeft = _leftSideBaggage.GetComponent<RectTransform>().rect.size;
 
         // Set sell settings.
-        Vector2 _cellSizeVec = _rectSize / 4.2f;
+        Vector2 _cellSizeVec = _rectSizeLeft / _sizeArrayItems.width / 1.05f;
         _leftSideBaggage.cellSize = _cellSizeVec;
         _rightSideBaggage.cellSize = _leftSideBaggage.cellSize;
         _playerItemPanel.cellSize = _leftSideBaggage.cellSize;
@@ -57,10 +57,17 @@ public class ServiceManager : MonoBehaviour
             if(item.childCount != 0)
                 return;
 
-        for (int i = 0; i < _leftSideBaggage.transform.childCount - 1; i++)
-            if (_leftSideBaggage.transform.GetChild(i).childCount != 0 &&  _rightSideBaggage.transform.GetChild(i).childCount != 0)
-                return;
+        List<int> _rightInverseItemRows = new List<int>();
 
+        for (int i = 0; i < _leftSideBaggage.transform.childCount; i++)
+        {
+            int index = ((_sizeArrayItems.width -1) - i % _sizeArrayItems.width) + (int)Math.Floor((double)i / _sizeArrayItems.width) * _sizeArrayItems.width;
+            _rightInverseItemRows.Add(_rightSideBaggage.transform.GetChild(index).childCount);
+        }
+
+        for (int i = 0; i < _leftSideBaggage.transform.childCount; i++)
+            if (_leftSideBaggage.transform.GetChild(i).childCount != 0 && _rightInverseItemRows[i] != 0)
+                return;
 
         _player.Status = PlayerStatus.Idle;
         _passenger.Pay(_player);
